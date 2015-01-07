@@ -173,19 +173,19 @@ static inline NSString * TTTByteUnitStringForSIPrefix(TTTUnitPrefix prefix) {
 }
 
 - (TTTUnitPrefix)prefixForInteger:(NSUInteger)value {
-    if ([self scaleFactorForPrefix:TTTExa] < value) {
-        return TTTExa;
-    } else if ([self scaleFactorForPrefix:TTTPeta] < value) {
-        return TTTPeta;
-    } else if ([self scaleFactorForPrefix:TTTTera] < value) {
-        return TTTTera;
-    } else if ([self scaleFactorForPrefix:TTTGiga] < value) {
-        return TTTGiga;
-    } else if ([self scaleFactorForPrefix:TTTMega] < value) {
-        return TTTMega;
-    } else {
-        return TTTKilo;
-    }
+	if ([self scaleFactorForPrefix:TTTExa] <= value) {
+		return TTTExa;
+	} else if ([self scaleFactorForPrefix:TTTPeta] <= value) {
+		return TTTPeta;
+	} else if ([self scaleFactorForPrefix:TTTTera] <= value) {
+		return TTTTera;
+	} else if ([self scaleFactorForPrefix:TTTGiga] <= value) {
+		return TTTGiga;
+	} else if ([self scaleFactorForPrefix:TTTMega] <= value) {
+		return TTTMega;
+	} else {
+		return TTTKilo;
+	}
 }
 
 #pragma mark -
