@@ -172,7 +172,7 @@ static inline NSString * TTTByteUnitStringForSIPrefix(TTTUnitPrefix prefix) {
     return self.usesIECBinaryPrefixesForCalculation ? TTTScaleFactorForIECPrefix(prefix) : TTTScaleFactorForSIPrefix(prefix);
 }
 
-- (TTTUnitPrefix)prefixForInteger:(NSUInteger)value {
+- (TTTUnitPrefix)prefixForDouble:(double)value {
 	if ([self scaleFactorForPrefix:TTTExa] <= value) {
 		return TTTExa;
 	} else if ([self scaleFactorForPrefix:TTTPeta] <= value) {
@@ -201,7 +201,7 @@ static inline NSString * TTTByteUnitStringForSIPrefix(TTTUnitPrefix prefix) {
     if (doubleValue < [self scaleFactorForPrefix:TTTKilo]) {
         unitString = self.displaysInTermsOfBytes ? NSLocalizedStringFromTable(@"bytes", @"FormatterKit", @"Byte Unit") : NSLocalizedStringFromTable(@"bits", @"FormatterKit", @"Bit Unit");
     } else {
-        TTTUnitPrefix prefix = [self prefixForInteger:(NSUInteger)round(doubleValue)];
+        TTTUnitPrefix prefix = [self prefixForDouble:round(doubleValue)];
         if (self.displaysInTermsOfBytes) {
             unitString = self.usesIECBinaryPrefixesForDisplay ? TTTByteUnitStringForIECPrefix(prefix) : TTTByteUnitStringForSIPrefix(prefix);
         } else {
@@ -214,10 +214,33 @@ static inline NSString * TTTByteUnitStringForSIPrefix(TTTUnitPrefix prefix) {
     return [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"Unit of Information Format String", @"FormatterKit", [NSBundle mainBundle], @"%@ %@", @"#{Value} #{Unit}"), [_numberFormatter stringFromNumber:@(doubleValue)], unitString];
 }
 
+- (NSString *)stringFromNumberOfBytesInTermsOfBytes:(NSNumber *)number
+{
+	NSString *unitString = nil;
+	double doubleValue = [number doubleValue];
+
+	if (doubleValue < [self scaleFactorForPrefix:TTTKilo]) {
+		unitString = NSLocalizedStringFromTable(@"bytes", @"FormatterKit", @"Byte Unit");
+	} else {
+		TTTUnitPrefix prefix = [self prefixForDouble:round(doubleValue)];
+		unitString = self.usesIECBinaryPrefixesForDisplay ? TTTByteUnitStringForIECPrefix(prefix) : TTTByteUnitStringForSIPrefix(prefix);
+		doubleValue /= [self scaleFactorForPrefix:prefix];
+	}
+
+	return [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"Unit of Information Format String", @"FormatterKit", [NSBundle mainBundle], @"%@ %@", @"#{Value} #{Unit}"), [_numberFormatter stringFromNumber:@(doubleValue)], unitString];
+}
+
 - (NSString *)stringFromNumber:(NSNumber *)number
                         ofUnit:(TTTUnitOfInformation)unit
 {
-    return [self stringFromNumberOfBits:@([number unsignedLongLongValue] * TTTNumberOfBitsInUnit(unit))];
+	if (unit == TTTByte && self.displaysInTermsOfBytes)
+	{
+		return [self stringFromNumberOfBytesInTermsOfBytes:number];
+	}
+	else
+	{
+		return [self stringFromNumberOfBits:@([number unsignedLongLongValue] * TTTNumberOfBitsInUnit(unit))];
+	}
 }
 
 - (NSString *)stringFromNumber:(NSNumber *)number
